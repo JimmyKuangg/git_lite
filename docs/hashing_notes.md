@@ -1,0 +1,11 @@
+- Git hashes the content of the file, not the file itself
+- Hashes are stored within Git's folder system, using split up parts
+  - If the hash comes out to be "abc123", then it might be stored somewhere under .git_lite/objects/ab/c123
+- If two files contain the exact same content, the content will hash the exact same way
+  - If hello.txt contains "Hello World!", it's content hash may become "abc123"
+  - If hello_again.txt contains the same exact "Hello World!", it's content hash would be the same, "abc123"
+- Files use content hashes as identifiers
+  - File -> Hash -> Content
+    - hello.txt contains "Hello World!" -> hello.txt points to hash "abc123"
+    - hello_again.txt contains "Hello World!" -> hello_again.txt points to hash "abc123" as well.
+    - Both files would point to the same storage inside of Git
