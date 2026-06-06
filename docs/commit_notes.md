@@ -1,0 +1,10 @@
+- A commit is a snapshot of the repository at a moment in time
+- A commit points to a root tree that represents the repository structure for that snapshot
+- A commit stores metadata about a snapshot, such as:
+  - Author
+  - Timestamp
+  - Commit message
+- The actual repository structure is stored in the root tree referenced by the commit
+- By adding parent commit hashes, we go from loose snapshots to a directed chain of progress
+  - This is where Git starts to turn into a sort of Linked List
+  - With the addition of branching, this would then turn it into a DAG (Directed Acyclic Graph)
