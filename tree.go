@@ -12,12 +12,17 @@ type Tree struct {
   Entries []TreeEntry
 }
 
+const (
+  BlobType = "blob"
+  TreeType = "tree"
+)
+
 func (t *Tree) Add(name string, typeof string, hash string) error {
 	if (name == "") {
 		return errors.New("invalid name")
 	}
 
-	if (typeof != "blob" && typeof != "tree") {
+	if (typeof != BlobType && typeof != TreeType) {
 		return errors.New("invalid type")
 	}
 
