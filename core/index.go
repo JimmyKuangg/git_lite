@@ -25,6 +25,7 @@ func (i *Index) Add(path string, hash string) {
 
 func ReadIndex() (*Index, error) {
 	content, err := os.ReadFile(IndexPath)
+	
   if os.IsNotExist(err) {
     return &Index{
         Entries: make(map[string]string),
