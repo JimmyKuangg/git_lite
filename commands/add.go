@@ -39,10 +39,17 @@ func stageFile(path string) error {
 		return err
 	}
 	
-	_, err = core.WriteObject(content)
+	hash, err := core.WriteObject(content)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	index, err := core.ReadIndex()
+  if err != nil {
+      return err
+  }
+
+  index.Add(path, hash)
+
+  return index.Save()
 }
