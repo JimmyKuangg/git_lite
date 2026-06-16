@@ -9,25 +9,25 @@ import (
 func Add(path string) error {
     info, err := os.Stat(path)
     if err != nil {
-        return err
+      return err
     }
 
     if !info.IsDir() {
-        return stageFile(path)
+      return stageFile(path)
     }
 
     entries, err := os.ReadDir(path)
     if err != nil {
-        return err
+      return err
     }
 
     for _, entry := range entries {
-        fullPath := filepath.Join(path, entry.Name())
-
-        err := Add(fullPath)
-        if err != nil {
-            return err
-        }
+      fullPath := filepath.Join(path, entry.Name())
+      err := Add(fullPath)
+      
+			if err != nil {
+          return err
+      }
     }
 
     return nil

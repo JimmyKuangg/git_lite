@@ -1,8 +1,10 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -50,4 +52,35 @@ func ReadIndex() (*Index, error) {
 	}
 
 	return index, nil
+}
+
+func (i *Index) Save() error {
+	var entriesSlice []IndexEntry
+
+	for path, hash := range i.Entries {
+		entriesSlice = append(entriesSlice, IndexEntry{
+			Path: path, 
+			Hash: hash,
+		})
+	}
+
+	sort.Slice(entriesSlice, func(i, j int) bool {
+		return entriesSlice[i].Path < entriesSlice[j].Path
+	})
+
+	var buf bytes.Buffer
+
+	for _, entry := range entriesSlice {
+		buf.WriteString(entry.Path)
+		buf.WriteByte(' ')
+		buf.WriteString(entry.Hash)
+		buf.WriteByte('\n')
+	}
+
+	err := os.WriteFile(IndexPath, buf.Bytes(), 0644)
+	if err != nil {
+		return fmt.Errorf("error writing index file: %w", err)
+	}
+
+	return nil
 }
