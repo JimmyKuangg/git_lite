@@ -2,12 +2,15 @@ package core
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"sort"
+	"strings"
 )
+
+type TreeNode struct {
+  Files []TreeEntry
+  Children map[string]*TreeNode
+}
 
 type TreeEntry struct {
   Name string
@@ -24,26 +27,8 @@ const (
   TreeType = "tree"
 )
 
-func (t *Tree) Add(name string, typeof string, hash string) error {
-	if (name == "") {
-		return errors.New("invalid name")
-	}
-
-	if (typeof != BlobType && typeof != TreeType) {
-		return errors.New("invalid type")
-	}
-
-	if (hash == "") {
-		return errors.New("invalid hash")
-	}
-
-	t.Entries = append(t.Entries, TreeEntry{
-		Name: name,
-		Type: typeof,
-		Hash: hash,
-	})
-
-	return nil
+func (t *Tree) Add(entry TreeEntry) {
+	t.Entries = append(t.Entries, entry)
 }
 
 func (t *Tree) Encode() []byte {
@@ -65,41 +50,69 @@ func (t *Tree) Encode() []byte {
 	return buf.Bytes()
 }
 
-func BuildTree(path string) (string, error) {
-	tree := Tree{}
-	entries, err := os.ReadDir(path)
-	if (err != nil) {
-		return "", fmt.Errorf("error reading directory, %w", err)
+func BuildTree() (*TreeNode, error) {
+	tree := &TreeNode{
+    Children: make(map[string]*TreeNode),
 	}
 
-	for _, entry := range entries {
-		fullPath := filepath.Join(path, entry.Name())
+	index, err := ReadIndex()
+	if err != nil {
+		return nil, err
+	}
 
-		if !entry.IsDir() {
-			content, err := os.ReadFile(fullPath)
-			if err != nil {
-				return "", fmt.Errorf("error reading file, %w", err)
+	for path, hash := range index.Entries {
+		pathSlice := strings.Split(path, "/")
+
+		dirs := pathSlice[:len(pathSlice)-1]
+		file := pathSlice[len(pathSlice)-1]
+
+		current := tree
+
+		for _, dir := range dirs {
+			if current.Children[dir] == nil {
+				current.Children[dir] = &TreeNode{
+					Children: make(map[string]*TreeNode),
+				}
 			}
 
-			blobHash, err := WriteObject(content)
-			if err != nil {
-					return "", err
-			}
-
-			tree.Add(entry.Name(), BlobType, blobHash )
-		} else {
-			subTreeHash, err := BuildTree(fullPath)
-			if err != nil {
-				return "", fmt.Errorf("error building tree, %w", err)
-			}
-			tree.Add(entry.Name(), TreeType, subTreeHash)
+			current = current.Children[dir]
 		}
+
+		current.Files = append(current.Files, TreeEntry{
+			Name: file,
+			Type: BlobType,
+			Hash: hash,
+		})
+	}
+
+	return tree, nil
+}
+
+func WriteTree(node *TreeNode) (string, error) {
+	tree := Tree{}
+	
+	for _, file := range node.Files {
+		tree.Add(file)
+	}
+
+	for name, child := range node.Children {
+		subTreeHash, err := WriteTree(child)
+		if err != nil {
+			return "", fmt.Errorf("error building tree, %w", err)
+		}
+
+		tree.Add(TreeEntry{
+			Name: name,
+			Hash: subTreeHash,
+			Type: TreeType,
+		})
 	}
 
 	treeBytes := tree.Encode()
 	hash, err := WriteObject(treeBytes)
 	if err != nil {
-			return "", err
+		return "", err
 	}
+
 	return hash, nil
 }
