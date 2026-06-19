@@ -2,6 +2,8 @@ package core
 
 import (
 	"bytes"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -11,6 +13,32 @@ type Commit struct {
 	Message 	string
 	Root 			string
 	Parent 		string
+}
+
+func BuildCommit(message string, root string) (Commit, error) {
+	author := os.Getenv("USER")
+	if author == "" {
+		author = "unknown"
+	}
+
+	head, err := ReadHEAD() 
+	if err != nil {
+		return Commit{}, err
+	}
+
+	if strings.HasPrefix(head, "ref: ") {
+    head = ""
+	}
+
+	commit := Commit{
+		Author: author,
+		Message: message,
+		Root: root,
+		Parent: head,
+		Timestamp: time.Now(),
+	}
+
+	return commit, nil
 }
 
 func (c *Commit) Encode() []byte {
