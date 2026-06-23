@@ -7,6 +7,11 @@ import (
 )
 
 func Log() error {
+	_, err := core.EnsureGitliteRepo()
+	if err != nil {
+		return err
+	}
+
 	currentHash, err := core.ReadHEAD()
 	if err != nil {
 		return err

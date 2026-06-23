@@ -5,6 +5,11 @@ import (
 )
 
 func Commit(message string) error {
+	_, err := core.EnsureGitliteRepo()
+	if err != nil {
+		return err
+	}
+
 	tree, err := core.BuildTree()
 	if err != nil {
 		return err

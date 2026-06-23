@@ -28,7 +28,7 @@ func EnsureGitliteRepo() (string, error) {
     parent := filepath.Dir(current)
 
     if parent == current {
-      return "", errors.New("not a gitlite repository")
+      return "", errors.New("error: not a gitlite repository (or any of the parent directories)")
     }
 
     current = parent
