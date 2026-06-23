@@ -68,8 +68,8 @@ func (c *Commit) Encode() []byte {
 	return buf.Bytes()
 }
 
-func ReadCommit(bytes []byte) (Commit, error) {
-	stream := string(bytes)
+func ParseCommit(data []byte) (Commit, error) {
+	stream := string(data)
 	lines := strings.Split(stream, "\n")
 
 	var c Commit
@@ -93,7 +93,7 @@ func ReadCommit(bytes []byte) (Commit, error) {
 			c.Author = val
 		case "message":
 			c.Message = val
-		case "root":
+		case "tree":
 			c.Root = val
 		case "parent":
 			c.Parent = val
@@ -107,4 +107,13 @@ func ReadCommit(bytes []byte) (Commit, error) {
 	}
 
 	return c, nil
+}
+
+func ReadCommit(hash string) (Commit, error) {
+    data, err := ReadObject(hash)
+    if err != nil {
+        return Commit{}, err
+    }
+
+    return ParseCommit(data)
 }
