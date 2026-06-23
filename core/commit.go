@@ -62,8 +62,7 @@ func (c *Commit) Encode() []byte {
 	buf.WriteString(c.Timestamp.UTC().Format(time.RFC3339))
 	buf.WriteByte('\n')
 
-	buf.WriteByte('\n')
-
+	buf.WriteString("message ")
 	buf.WriteString(c.Message)
 	return buf.Bytes()
 }
