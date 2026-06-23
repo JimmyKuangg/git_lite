@@ -7,30 +7,35 @@ import (
 )
 
 func Add(path string) error {
-    info, err := os.Stat(path)
-    if err != nil {
+  _, err := core.EnsureGitliteRepo()
+	if err != nil {
+		return err
+	}
+
+  info, err := os.Stat(path)
+  if err != nil {
+    return err
+  }
+
+  if !info.IsDir() {
+    return stageFile(path)
+  }
+
+  entries, err := os.ReadDir(path)
+  if err != nil {
+    return err
+  }
+
+  for _, entry := range entries {
+    fullPath := filepath.Join(path, entry.Name())
+    err := Add(fullPath)
+    
+		if err != nil {
       return err
     }
+  }
 
-    if !info.IsDir() {
-      return stageFile(path)
-    }
-
-    entries, err := os.ReadDir(path)
-    if err != nil {
-      return err
-    }
-
-    for _, entry := range entries {
-      fullPath := filepath.Join(path, entry.Name())
-      err := Add(fullPath)
-      
-			if err != nil {
-          return err
-      }
-    }
-
-    return nil
+  return nil
 }
 
 func stageFile(path string) error {
