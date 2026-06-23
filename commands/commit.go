@@ -4,7 +4,7 @@ import (
 	"git_lite/core"
 )
 
-func Commit() error {
+func Commit(message string) error {
 	tree, err := core.BuildTree()
 	if err != nil {
 		return err
@@ -15,7 +15,7 @@ func Commit() error {
 		return err
 	}
 
-	commit, err := core.BuildCommit("", treeHash)
+	commit, err := core.BuildCommit(message, treeHash)
 	if err != nil {
 		return err
 	}
