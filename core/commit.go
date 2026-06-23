@@ -49,9 +49,9 @@ func (c *Commit) Encode() []byte {
 	buf.WriteByte('\n')
 
 	if c.Parent != "" {
-			buf.WriteString("parent ")
-			buf.WriteString(c.Parent)
-			buf.WriteByte('\n')
+		buf.WriteString("parent ")
+		buf.WriteString(c.Parent)
+		buf.WriteByte('\n')
 	}
 
 	buf.WriteString("author ")
@@ -66,4 +66,54 @@ func (c *Commit) Encode() []byte {
 
 	buf.WriteString(c.Message)
 	return buf.Bytes()
+}
+
+func ParseCommit(data []byte) (Commit, error) {
+	stream := string(data)
+	lines := strings.Split(stream, "\n")
+
+	var c Commit
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		split := strings.SplitN(line, " ", 2)
+		if len(split) < 2 {
+			continue 
+		}
+
+		key := split[0]
+		val := split[1]
+
+		switch key {
+		case "author":
+			c.Author = val
+		case "message":
+			c.Message = val
+		case "tree":
+			c.Root = val
+		case "parent":
+			c.Parent = val
+		case "timestamp":
+			t, err := time.Parse(time.RFC3339, val)
+			if err != nil {
+				return Commit{}, err
+			}
+			c.Timestamp = t
+		}
+	}
+
+	return c, nil
+}
+
+func ReadCommit(hash string) (Commit, error) {
+    data, err := ReadObject(hash)
+    if err != nil {
+        return Commit{}, err
+    }
+
+    return ParseCommit(data)
 }
