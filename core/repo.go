@@ -7,6 +7,12 @@ import (
 	"path/filepath"
 )
 
+type Status struct {
+	Untracked []string
+	Modified 	[]string
+	Deleted 	[]string
+}
+
 func EnsureGitliteRepo() (string, error) {
 	current, err := os.Getwd()
 	if err != nil {
@@ -35,42 +41,44 @@ func EnsureGitliteRepo() (string, error) {
 	}
 }
 
-func ScanWorkingDirectory() (map[string]string, error) {
+func ScanWorkingDirectory() (Status, error) {
+	var statuses Status
+
 	root, err := EnsureGitliteRepo()
 	if err != nil {
-		return nil, err
+		return statuses, err
 	}
 
 	workingIndex, err := BuildWorkingSnapshot(root)
 	if err != nil {
-		return nil, err
+		return statuses, err
 	}
 
 	stagedIndex, err := ReadIndex()
 	if err != nil {
-		return nil, err
+		return statuses, err
 	}
 
 	for path, workingHash := range workingIndex {
 		stagedHash, exists := stagedIndex.Entries[path]
 		if !exists {
-			fmt.Printf("untracked: %s\n", path)
+			statuses.Untracked = append(statuses.Untracked, path)
 			continue
 		}
 
 		if stagedHash != workingHash {
-			fmt.Printf("modified: %s\n", path)
+			statuses.Modified = append(statuses.Modified, path)
 		}
 	}
 
 	for path := range stagedIndex.Entries {
     _, exists := workingIndex[path]
     if !exists {
-        fmt.Printf("deleted: %s\n", path)
+      statuses.Deleted = append(statuses.Deleted, path)
     }
-}
+	}
 
-	return nil, nil
+	return statuses, nil
 }
 
 func BuildWorkingSnapshot(root string) (map[string]string, error) {
