@@ -28,7 +28,7 @@ func ReadIndex() (*Index, error) {
 	
   if os.IsNotExist(err) {
     return &Index{
-        Entries: make(map[string]string),
+      Entries: make(map[string]string),
     }, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("unable to read index: %w", err)
