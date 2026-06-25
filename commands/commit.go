@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"git_lite/core"
 )
 
@@ -18,6 +19,33 @@ func Commit(message string) error {
 	treeHash, err := core.WriteTree(tree)
 	if err != nil {
 		return err
+	}
+	
+	// Check HEAD to see if we have a new tree or not before commiting
+	headHash, err := core.ReadHEAD()
+	if err != nil {
+		return err
+	}
+
+	// If HEAD is empty, then we have no previous commits
+  // No need to compare
+	if headHash != "" {
+		prevCommitBytes, err := core.ReadObject(headHash)
+		if err != nil {
+			return err
+		}
+
+		prevCommit, err := core.ParseCommit(prevCommitBytes)
+		if err != nil {
+			return err
+		}
+
+		// Compare the root tree hash of the previous commit with our current tree hash
+		// If the two are the same, it means we have made no changes to tracked files
+		// Meaning, no need to commit
+		if prevCommit.Root == treeHash {
+			return fmt.Errorf("nothing to commit; staging area matches HEAD")
+		}
 	}
 
 	commit, err := core.BuildCommit(message, treeHash)
