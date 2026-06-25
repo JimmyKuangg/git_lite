@@ -7,29 +7,29 @@ import (
 )
 
 func main() {
-    args := os.Args
-		var err error
+  args := os.Args
+	var err error
 
-		if len(args) < 2 {
-			fmt.Println("usage: gitlite <command>")
-    	return
-		}
+	if len(args) < 2 {
+		fmt.Println("usage: gitlite <command>")
+   	return
+	}
 
-    switch args[1] {
-    case "add":
-      err = commands.Add(args[2])
+  switch args[1] {
+  case "add":
+    err = commands.Add(args[2])
 
-    case "commit":
-      err = commands.Commit(args[2])
+  case "commit":
+    err = commands.Commit(args[2])
 
-    case "log":
-      err = commands.Log()
+  case "log":
+    err = commands.Log()
 		
-		case "init":
-			err = commands.Init()
-    }
+	case "init":
+		err = commands.Init()
+  }
 
-		if err != nil {
-			fmt.Println(err)
-		}
+	if err != nil {
+		fmt.Println(err)
+	}
 }

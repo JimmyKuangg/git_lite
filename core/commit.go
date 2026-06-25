@@ -111,7 +111,7 @@ func ParseCommit(data []byte) (Commit, error) {
 func ReadCommit(hash string) (Commit, error) {
     data, err := ReadObject(hash)
     if err != nil {
-        return Commit{}, err
+      return Commit{}, err
     }
 
     return ParseCommit(data)

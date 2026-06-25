@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -28,7 +29,7 @@ func ReadIndex() (*Index, error) {
 	
   if os.IsNotExist(err) {
     return &Index{
-        Entries: make(map[string]string),
+      Entries: make(map[string]string),
     }, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("unable to read index: %w", err)
@@ -84,4 +85,56 @@ func (i *Index) Save() error {
 	}
 
 	return nil
+}
+
+func ScanWorkingDirectory() (map[string]string, error) {
+	root, err := EnsureGitliteRepo()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = BuildIndexFromRoot(root)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func BuildIndexFromRoot(root string) (map[string]string, error) {
+	index := make(map[string]string)
+
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return nil, fmt.Errorf("error reading directory, %w", err)
+	}
+
+	for _, entry := range entries {
+		fullPath := filepath.Join(root, entry.Name())
+		relativePath, err := filepath.Rel(root, fullPath)
+		if err != nil {
+				return nil, err
+		}
+
+		if !entry.IsDir() {
+			content, err := os.ReadFile(fullPath)
+			if err != nil {
+				return nil, err
+			}
+			hash := Hash(content)
+
+			index[relativePath] = hash
+		} else if entry.Name() != ".gitlite" && entry.Name() != ".git" {
+			subIndex, err := BuildIndexFromRoot(fullPath)
+			if err != nil {
+				return nil, fmt.Errorf("error index from root, %w", err)
+			}
+
+			for key, val := range subIndex {
+				index[relativePath + "/" + key] = val
+			}
+		}
+	}
+
+	return index, nil
 }
