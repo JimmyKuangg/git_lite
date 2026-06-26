@@ -11,7 +11,12 @@ type Status struct {
 	Untracked []string
 	Modified 	[]string
 	Deleted 	[]string
-	Staged 		[]string
+}
+
+type Staged struct {
+	Untracked []string
+	Modified 	[]string
+	Deleted 	[]string
 }
 
 func EnsureGitliteRepo() (string, error) {
@@ -80,6 +85,57 @@ func ScanWorkingDirectory() (Status, error) {
 	}
 
 	return statuses, nil
+}
+
+func ScanStagedDirectory() (Staged, error) {
+	var staged Staged
+
+	headHash, err := ReadHEAD()
+	if err != nil {
+		return Staged{}, err
+	}
+
+	headBytes, err := ReadObject(headHash)
+	if err != nil {
+		return Staged{}, err
+	}
+
+	prevCommit, err := ParseCommit(headBytes)
+	if err != nil {
+		return Staged{}, err
+	}
+
+	prevTreeHash := prevCommit.Root
+	prevCommitTree, err := FlattenTree(prevTreeHash)
+	if err != nil {
+		return Staged{}, err
+	}
+
+	stagedIndex, err := ReadIndex()
+	if err != nil {
+		return Staged{}, err
+	}
+
+	for path, hash := range stagedIndex.Entries {
+		prevHash, exists := prevCommitTree[path]
+
+		if !exists {
+			staged.Untracked = append(staged.Untracked, path)
+			continue
+		}
+
+		if prevHash != hash {
+			staged.Modified = append(staged.Modified, path)
+		}
+	}
+
+	for path := range prevCommitTree {
+		if _, exists := stagedIndex.Entries[path]; !exists {
+			staged.Deleted = append(staged.Deleted, path)
+		}
+	}
+
+	return staged, nil
 }
 
 func BuildWorkingSnapshot(root string) (map[string]string, error) {
