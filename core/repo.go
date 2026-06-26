@@ -11,6 +11,7 @@ type Status struct {
 	Untracked []string
 	Modified 	[]string
 	Deleted 	[]string
+	Staged 		[]string
 }
 
 func EnsureGitliteRepo() (string, error) {
