@@ -5,18 +5,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-type Status struct {
-	Untracked []string
-	Modified 	[]string
-	Deleted 	[]string
-}
-
-type Staged struct {
-	Untracked []string
-	Modified 	[]string
-	Deleted 	[]string
+type Diff struct {
+    Untracked []string
+    Modified  []string
+    Deleted   []string
 }
 
 func EnsureGitliteRepo() (string, error) {
@@ -47,95 +42,57 @@ func EnsureGitliteRepo() (string, error) {
 	}
 }
 
-func ScanWorkingDirectory() (Status, error) {
-	var statuses Status
-
+func ScanWorkingDirectory() (Diff, error) {
 	root, err := EnsureGitliteRepo()
 	if err != nil {
-		return statuses, err
+		return Diff{}, err
 	}
 
 	workingIndex, err := BuildWorkingSnapshot(root)
 	if err != nil {
-		return statuses, err
+		return Diff{}, err
 	}
 
 	stagedIndex, err := ReadIndex()
 	if err != nil {
-		return statuses, err
+		return Diff{}, err
 	}
 
-	for path, workingHash := range workingIndex {
-		stagedHash, exists := stagedIndex.Entries[path]
-		if !exists {
-			statuses.Untracked = append(statuses.Untracked, path)
-			continue
-		}
-
-		if stagedHash != workingHash {
-			statuses.Modified = append(statuses.Modified, path)
-		}
-	}
-
-	for path := range stagedIndex.Entries {
-    _, exists := workingIndex[path]
-    if !exists {
-      statuses.Deleted = append(statuses.Deleted, path)
-    }
-	}
-
-	return statuses, nil
+	return CompareSnapshots(workingIndex, stagedIndex.Entries), nil
 }
 
-func ScanStagedDirectory() (Staged, error) {
-	var staged Staged
-
+func ScanStagedDirectory() (Diff, error) {
 	headHash, err := ReadHEAD()
 	if err != nil {
-		return Staged{}, err
+		return Diff{}, err
 	}
 
-	headBytes, err := ReadObject(headHash)
-	if err != nil {
-		return Staged{}, err
-	}
+	prevCommitTree := make(map[string]string)
 
-	prevCommit, err := ParseCommit(headBytes)
-	if err != nil {
-		return Staged{}, err
-	}
-
-	prevTreeHash := prevCommit.Root
-	prevCommitTree, err := FlattenTree(prevTreeHash)
-	if err != nil {
-		return Staged{}, err
+	if headHash != "" && !strings.HasPrefix(headHash, "ref") {
+		headBytes, err := ReadObject(headHash)
+		if err != nil {
+			return Diff{}, err
+		}
+	
+		prevCommit, err := ParseCommit(headBytes)
+		if err != nil {
+			return Diff{}, err
+		}
+	
+		prevTreeHash := prevCommit.Root
+		prevCommitTree, err = FlattenTree(prevTreeHash)
+		if err != nil {
+			return Diff{}, err
+		}
 	}
 
 	stagedIndex, err := ReadIndex()
 	if err != nil {
-		return Staged{}, err
+		return Diff{}, err
 	}
 
-	for path, hash := range stagedIndex.Entries {
-		prevHash, exists := prevCommitTree[path]
-
-		if !exists {
-			staged.Untracked = append(staged.Untracked, path)
-			continue
-		}
-
-		if prevHash != hash {
-			staged.Modified = append(staged.Modified, path)
-		}
-	}
-
-	for path := range prevCommitTree {
-		if _, exists := stagedIndex.Entries[path]; !exists {
-			staged.Deleted = append(staged.Deleted, path)
-		}
-	}
-
-	return staged, nil
+	return CompareSnapshots(stagedIndex.Entries, prevCommitTree), nil
 }
 
 func BuildWorkingSnapshot(root string) (map[string]string, error) {
@@ -174,4 +131,29 @@ func BuildWorkingSnapshot(root string) (map[string]string, error) {
 	}
 
 	return index, nil
+}
+
+func CompareSnapshots(current, previous map[string]string) Diff {
+	var diffs Diff
+
+	for path, currentHash := range current {
+		previousHash, exists := previous[path]
+
+		if !exists {
+			diffs.Untracked = append(diffs.Untracked, path)
+			continue
+		}
+
+		if currentHash != previousHash {
+			diffs.Modified = append(diffs.Modified, path)
+		}
+	}
+
+	for path := range previous {
+		if _, exists := current[path]; !exists {
+			diffs.Deleted = append(diffs.Deleted, path)
+		}
+	}
+
+	return diffs
 }

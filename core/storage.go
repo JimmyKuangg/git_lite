@@ -35,7 +35,7 @@ func WriteObject(content []byte) (string, error) {
 func ReadObject(hash string) ([]byte, error) {
 	if len(hash) < 40 {
     return nil, errors.New("invalid hash")
-}
+	}
 
 	file := filepath.Join(GitDir, "objects", hash[:2], hash[2:])
 	bytes, err := os.ReadFile(file)
