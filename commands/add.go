@@ -12,6 +12,10 @@ func Add(path string) error {
 		return err
 	}
 
+  if path == "." {
+    path = "."
+  }
+
   info, err := os.Stat(path)
   if err != nil {
     return err
@@ -20,6 +24,7 @@ func Add(path string) error {
   if !info.IsDir() {
     return stageFile(path)
   }
+  
 
   entries, err := os.ReadDir(path)
   if err != nil {
@@ -27,6 +32,12 @@ func Add(path string) error {
   }
 
   for _, entry := range entries {
+    if entry.IsDir() {
+      if entry.Name() == ".gitlite" || entry.Name() == ".git" {
+        continue
+      }
+    }
+
     fullPath := filepath.Join(path, entry.Name())
     err := Add(fullPath)
     
