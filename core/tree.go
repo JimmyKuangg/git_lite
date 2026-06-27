@@ -116,3 +116,38 @@ func WriteTree(node *TreeNode) (string, error) {
 
 	return hash, nil
 }
+
+func FlattenTree(treeHash string) (map[string]string, error) {
+	flattened := make(map[string]string)
+
+	treeBytes, err := ReadObject(treeHash)
+	if err != nil {
+		return nil, err
+	}
+
+	
+	treeData := string(treeBytes)
+	dataSlice := strings.Split(strings.TrimSpace(treeData), "\n")
+
+	for _, entry := range dataSlice {
+		entryParts := strings.Split(entry, " ")
+		entryType := entryParts[0]
+		entryName := entryParts[1]
+		entryHash := entryParts[2]
+
+		if entryType == BlobType {
+			flattened[entryName] = entryHash
+		} else {
+			flattenedSub, err := FlattenTree(entryHash)
+			if err != nil {
+				return nil, err
+			}
+
+			for key, flattenedEntry := range flattenedSub {
+				flattened[entryName + "/" + key] = flattenedEntry
+			}
+		}
+	}
+
+	return flattened, nil
+}

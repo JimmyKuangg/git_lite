@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"git_lite/core"
+	"strings"
 )
 
 func Commit(message string) error {
@@ -29,7 +30,7 @@ func Commit(message string) error {
 
 	// If HEAD is empty, then we have no previous commits
   // No need to compare
-	if headHash != "" {
+	if headHash != "" && !strings.HasPrefix(headHash, "ref: ") {
 		prevCommitBytes, err := core.ReadObject(headHash)
 		if err != nil {
 			return err
