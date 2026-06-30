@@ -2,7 +2,10 @@ package core
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -71,6 +74,11 @@ func ParseCommit(data []byte) (Commit, error) {
 	stream := string(data)
 	lines := strings.Split(stream, "\n")
 
+	foundRoot := false
+	foundAuthor := false
+	foundTimestamp := false
+	foundMessage := false
+
 	var c Commit
 
 	for _, line := range lines {
@@ -90,10 +98,13 @@ func ParseCommit(data []byte) (Commit, error) {
 		switch key {
 		case "author":
 			c.Author = val
+			foundAuthor = true
 		case "message":
 			c.Message = val
+			foundMessage = true
 		case "tree":
 			c.Root = val
+			foundRoot = true
 		case "parent":
 			c.Parent = val
 		case "timestamp":
@@ -102,17 +113,56 @@ func ParseCommit(data []byte) (Commit, error) {
 				return Commit{}, err
 			}
 			c.Timestamp = t
+			foundTimestamp = true
 		}
+	}
+
+	if !foundRoot || !foundAuthor || !foundTimestamp || !foundMessage {
+    return Commit{}, errors.New("invalid commit object")
 	}
 
 	return c, nil
 }
 
 func ReadCommit(hash string) (Commit, error) {
-    data, err := ReadObject(hash)
-    if err != nil {
-      return Commit{}, err
-    }
+  data, err := ReadObject(hash)
+  if err != nil {
+    return Commit{}, err
+  }
 
-    return ParseCommit(data)
+  return ParseCommit(data)
+}
+
+func ApplySnapshot(snapshot map[string]string) error {
+	for path, hash := range snapshot {
+		data, err := ReadObject(hash)
+		if err != nil {
+			return err
+		}
+
+		err = os.MkdirAll(filepath.Dir(path), 0755)
+		if err != nil {
+			return fmt.Errorf("error creating directory in ApplySnapshot: %w", err)
+		}
+
+		err = os.WriteFile(path, data, 0644) 
+		if err != nil {
+			return fmt.Errorf("error writing to file in ApplySnapshot: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func CleanupRemovedFiles(working, snapshot map[string]string) error {
+	for path := range working {
+    if _, exists := snapshot[path]; !exists {
+      err := os.Remove(path)
+			if err != nil {
+				return fmt.Errorf("error removing file at %s: %w", path, err)
+			}
+    }
+	}
+	
+	return nil
 }

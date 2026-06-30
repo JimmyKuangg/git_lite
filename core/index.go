@@ -23,6 +23,10 @@ func (i *Index) Add(path string, hash string) {
 	i.Entries[path] = hash
 }
 
+func (i *Index) Remove(path string) {
+	delete(i.Entries, path)
+}
+
 func ReadIndex() (*Index, error) {
 	content, err := os.ReadFile(IndexPath)
 	
@@ -84,4 +88,16 @@ func (i *Index) Save() error {
 	}
 
 	return nil
+}
+
+func WriteIndex(snapshot map[string]string) error {
+	i := Index{
+		Entries: make(map[string]string),
+	}
+
+	for path, hash := range snapshot {
+		i.Entries[path] = hash
+	}
+
+	return i.Save()
 }

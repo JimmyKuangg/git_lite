@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"git_lite/commands"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -30,6 +32,26 @@ func main() {
 	
 	case "status":
 		err = commands.Status()
+
+	case "checkout":
+		if len(args) < 3 {
+      fmt.Println("Usage: go run . checkout <commit-hash>")
+      return
+    }
+
+		fmt.Println("This process is irreversible and will discard all changes made after this commit. Are you sure?")
+		fmt.Println("Continue? (Y/N)")
+		
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+
+		input := strings.ToUpper(scanner.Text())
+		if input != "Y" {
+      fmt.Println("Checkout cancelled.")
+      return
+    }
+
+    err = commands.Checkout(args[2])
 
 	default:
 		err = fmt.Errorf("unknown command: '%s'", args[1])
