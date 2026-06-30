@@ -8,9 +8,9 @@ import (
 )
 
 type Diff struct {
-    Untracked []string
-    Modified  []string
-    Deleted   []string
+  Untracked []string
+  Modified  []string
+  Deleted   []string
 }
 
 func ScanWorkingDirectory() (Diff, error) {

@@ -1,86 +1,44 @@
 package commands
 
-import (
-	"git_lite/core"
-	"os"
-	"path/filepath"
-)
+import "git_lite/core"
 
 func Add(path string) error {
-  _, err := core.EnsureGitliteRepo()
+	root, err := core.EnsureGitliteRepo()
 	if err != nil {
 		return err
 	}
 
-  index, err := core.ReadIndex()
-  if err != nil {
-    return err
-  }
-
-  err = addHelper(path, index)
-  if err != nil && !os.IsNotExist(err) {
-    return err
-  }
-
-  if path == "." {
-    for path := range index.Entries {
-      if _, err := os.Stat(path); os.IsNotExist(err) {
-        index.Remove(path)
-      }
-    } 
-  } else {
-    if _, err := os.Stat(path); os.IsNotExist(err) {
-      index.Remove(path)
-    }
-  }
-
-  return index.Save()
-}
-
-func stageFile(path string, index *core.Index) error {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	
-	hash, err := core.WriteObject(content)
+	working, err := core.BuildWorkingSnapshot(root)
 	if err != nil {
 		return err
 	}
 
-  index.Add(path, hash)
-  return nil
-}
+	index, err := core.ReadIndex()
+	if err != nil {
+		return err
+	}
 
-func addHelper(path string, index *core.Index) error {
-  info, err := os.Stat(path)
-  if err != nil {
-    return err
-  }
+	if path == "." {
+		for file, hash := range working {
+			index.Add(file, hash)
+		}
 
-  if !info.IsDir() {
-    return stageFile(path, index)
-  }
+		for file := range index.Entries {
+			if _, exists := working[file]; !exists {
+				index.Remove(file)
+			}
+		}
 
-  entries, err := os.ReadDir(path)
-  if err != nil {
-    return err
-  }
+		return index.Save()
+	}
 
-  for _, entry := range entries {
-    if entry.IsDir() {
-      if entry.Name() == ".gitlite" || entry.Name() == ".git" {
-        continue
-      }
-    }
+	hash, exists := working[path]
 
-    fullPath := filepath.Join(path, entry.Name())
-    err := addHelper(fullPath, index)
-    
-		if err != nil {
-      return err
-    }
-  }
+	if exists {
+		index.Add(path, hash)
+		return index.Save()
+	}
 
-  return nil
+	index.Remove(path)
+	return index.Save()
 }
