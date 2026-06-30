@@ -18,8 +18,20 @@ func Add(path string) error {
   }
 
   err = addHelper(path, index)
-  if err != nil {
+  if err != nil && !os.IsNotExist(err) {
     return err
+  }
+
+  if path == "." {
+    for path := range index.Entries {
+      if _, err := os.Stat(path); os.IsNotExist(err) {
+        index.Remove(path)
+      }
+    } 
+  } else {
+    if _, err := os.Stat(path); os.IsNotExist(err) {
+      index.Remove(path)
+    }
   }
 
   return index.Save()
