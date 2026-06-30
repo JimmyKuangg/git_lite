@@ -3,7 +3,7 @@ package commands
 import "git_lite/core"
 
 func Checkout(commitHash string) error {
-	root, err := core.EnsureGitliteRepo()
+	_, err := core.EnsureGitliteRepo()
 	if err != nil {
 		return err
 	}
@@ -13,7 +13,17 @@ func Checkout(commitHash string) error {
 		return err
 	}
 
-	working, err := core.BuildWorkingSnapshot(root)
+	headHash, err := core.ReadHEAD()
+	if err != nil {
+		return err
+	}
+
+	currentCommit, err := core.ReadCommit(headHash)
+	if err != nil {
+		return err
+	}
+
+	currentSnapshot, err := core.FlattenTree(currentCommit.Root)
 	if err != nil {
 		return err
 	}
@@ -24,7 +34,7 @@ func Checkout(commitHash string) error {
 		return err
 	}
 	
-	err = core.CleanupRemovedFiles(working, snapshot)
+	err = core.CleanupRemovedFiles(currentSnapshot, snapshot)
 	if err != nil {
 		return err
 	}
