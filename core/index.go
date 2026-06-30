@@ -85,3 +85,15 @@ func (i *Index) Save() error {
 
 	return nil
 }
+
+func WriteIndex(snapshot map[string]string) error {
+	i := Index{
+		Entries: make(map[string]string),
+	}
+
+	for path, hash := range snapshot {
+		i.Entries[path] = hash
+	}
+
+	return i.Save()
+}
