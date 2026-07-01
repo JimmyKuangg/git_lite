@@ -1,6 +1,9 @@
 package commands
 
-import "git_lite/core"
+import (
+	"fmt"
+	"git_lite/core"
+)
 
 func Add(path string) error {
 	root, err := core.EnsureGitliteRepo()
@@ -39,6 +42,10 @@ func Add(path string) error {
 		return index.Save()
 	}
 
-	index.Remove(path)
-	return index.Save()
+	if _, tracked := index.Entries[path]; tracked {
+		index.Remove(path)
+		return index.Save()
+	}
+
+	return fmt.Errorf("%s does not exist", path)
 }
