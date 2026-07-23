@@ -4,13 +4,13 @@ A toy version control system written in Go that recreates a subset of Git's core
 
 GitLite supports creating repositories, staging files, creating commits, viewing history, and checking out previous commits. The goal wasn't to replace Git. It was to understand how Git actually works by rebuilding it from scratch.
 
-## Disclaimer (O_O)!
+## Disclaimer 
 
 Gitlite is intentionally a learning project. It recreates a small subset of Git's functionality with readability and education prioritized over performance or feature completeness.
 
 Not trying to replace Git. Not trying to cause an uprising. Just learning. Don't sue me pls.
 
-## Installation ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧
+## Installation
 
 - Ensure you have [Go installed](https://go.dev)
 - Clone the repository and run commands using Go.
