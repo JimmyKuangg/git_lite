@@ -36,7 +36,7 @@ go run . log
 go run . checkout <commit_hash>
 ```
 
-## Features (,,⟡o⟡,,)
+## Features 
 
 - Initialize a repository
 - Hash and store blob objects
@@ -45,13 +45,13 @@ go run . checkout <commit_hash>
 - View commit history
 - Checkout previous commits
 
-## Why Rebuild Git? ( • ᴖ • ｡)？
+## Why Rebuild Git?
 
 I've used Git for years without really understanding what happens underneath commands like `git add` or `git commit`.
 
 Instead of reading about Git's internals, I wanted to build a simplified version myself. Along the way I discovered that many commands were far more nuanced than I originally thought, especially the staging area. And the whole thing. The whole thing is very nuanced.
 
-## Basic Usage ( • ̀ω•́ )✧
+## Basic Usage 
 
 ```bash
 # Initialize a new GitLite repo
@@ -73,7 +73,7 @@ go run . status
 go run . checkout [commit_hash]
 ```
 
-## Project Structure (╭ರ\_•́)
+## Project Structure 
 
 `commands/`
 
@@ -91,7 +91,7 @@ go run . checkout [commit_hash]
 
 - Originally intended for development notes. Somewhere along the way those notes turned into blog posts instead. If you're curious about the bugs, misconceptions, and debugging adventures behind GitLite, you can read about them on my portfolio [here](https://jimmy-kuang.com/notes)!
 
-## Limitations ( •̀ - • )
+## Limitations
 
 Gitlite intentionally implements only a subset of Git.
 
@@ -104,7 +104,7 @@ Missing features include:
 - Conflict Resolution
 - Pack files
 
-## Future Work ╮(￣▽￣"")╭
+## Future Work
 
 If I have the time (or willpower) to improve on this, I may add:
 
@@ -113,7 +113,7 @@ If I have the time (or willpower) to improve on this, I may add:
 - Better and cleaner algorithms
 - More safety checks
 
-## What I Learned ദ്ദി ˉ͈̀꒳ˉ͈́ )✧
+## What I Learned 
 
 This project taught me:
 
@@ -125,7 +125,7 @@ This project taught me:
 
 Follow more about what I learned [here in my notes](https://jimmy-kuang.com/notes).
 
-## Deep Dive ( ⸝⸝´ ᵕ `⸝⸝)
+## Deep Dive
 
 If I haven't already advertised it enough yet, you can learn about the madness that was this project (and more) over in my [portfolio](https://jimmy-kuang.com/notes).
 
