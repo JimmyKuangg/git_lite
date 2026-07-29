@@ -12,7 +12,7 @@ func WriteHEAD(hash string) error {
 		return errors.New("cannot write empty HEAD")
 	}
 
-	err := os.WriteFile(".gitlite/HEAD", []byte(hash), 0644)
+	err := os.WriteFile(".gitlite/HEAD", []byte(hash), 0o644)
 	if err != nil {
 		return fmt.Errorf("failed to write HEAD: %w", err)
 	}

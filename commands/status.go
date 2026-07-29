@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	"git_lite/core"
 )
 
@@ -49,7 +50,7 @@ func printDiff(diff core.Diff, staged bool) {
 	if len(diff.Untracked) != 0 {
 		if staged {
 			fmt.Println("  New files:")
-			} else {
+		} else {
 			fmt.Println("  Untracked Files; Use go run . add [file name or '.'] to add them to the index:")
 		}
 

@@ -8,23 +8,23 @@ import (
 )
 
 type TreeNode struct {
-  Files []TreeEntry
-  Children map[string]*TreeNode
+	Files    []TreeEntry
+	Children map[string]*TreeNode
 }
 
 type TreeEntry struct {
-  Name string
-  Type string
-  Hash string
+	Name string
+	Type string
+	Hash string
 }
 
 type Tree struct {
-  Entries []TreeEntry
+	Entries []TreeEntry
 }
 
 const (
-  BlobType = "blob"
-  TreeType = "tree"
+	BlobType = "blob"
+	TreeType = "tree"
 )
 
 func (t *Tree) Add(entry TreeEntry) {
@@ -52,7 +52,7 @@ func (t *Tree) Encode() []byte {
 
 func BuildTree() (*TreeNode, error) {
 	tree := &TreeNode{
-    Children: make(map[string]*TreeNode),
+		Children: make(map[string]*TreeNode),
 	}
 
 	index, err := ReadIndex()
@@ -90,7 +90,7 @@ func BuildTree() (*TreeNode, error) {
 
 func WriteTree(node *TreeNode) (string, error) {
 	tree := Tree{}
-	
+
 	for _, file := range node.Files {
 		tree.Add(file)
 	}
@@ -125,7 +125,6 @@ func FlattenTree(treeHash string) (map[string]string, error) {
 		return nil, err
 	}
 
-	
 	treeData := string(treeBytes)
 	dataSlice := strings.Split(strings.TrimSpace(treeData), "\n")
 
@@ -144,7 +143,7 @@ func FlattenTree(treeHash string) (map[string]string, error) {
 			}
 
 			for key, flattenedEntry := range flattenedSub {
-				flattened[entryName + "/" + key] = flattenedEntry
+				flattened[entryName+"/"+key] = flattenedEntry
 			}
 		}
 	}

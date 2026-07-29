@@ -8,9 +8,9 @@ import (
 )
 
 type Diff struct {
-  Untracked []string
-  Modified  []string
-  Deleted   []string
+	Untracked []string
+	Modified  []string
+	Deleted   []string
 }
 
 func ScanWorkingDirectory() (Diff, error) {
@@ -45,12 +45,12 @@ func ScanStagedDirectory() (Diff, error) {
 		if err != nil {
 			return Diff{}, err
 		}
-	
+
 		prevCommit, err := ParseCommit(headBytes)
 		if err != nil {
 			return Diff{}, err
 		}
-	
+
 		prevTreeHash := prevCommit.Root
 		prevCommitTree, err = FlattenTree(prevTreeHash)
 		if err != nil {
@@ -78,7 +78,7 @@ func BuildWorkingSnapshot(root string) (map[string]string, error) {
 		fullPath := filepath.Join(root, entry.Name())
 		relativePath, err := filepath.Rel(root, fullPath)
 		if err != nil {
-				return nil, err
+			return nil, err
 		}
 
 		if !entry.IsDir() {
@@ -96,7 +96,7 @@ func BuildWorkingSnapshot(root string) (map[string]string, error) {
 			}
 
 			for key, val := range subIndex {
-				index[relativePath + "/" + key] = val
+				index[relativePath+"/"+key] = val
 			}
 		}
 	}

@@ -19,12 +19,12 @@ func WriteObject(content []byte) (string, error) {
 	dir := filepath.Join(GitDir, "objects", hash[:2])
 	file := filepath.Join(dir, hash[2:])
 
-	err := os.MkdirAll(dir, 0755)
+	err := os.MkdirAll(dir, 0o755)
 	if err != nil {
 		return "", fmt.Errorf("error creating directory %s: %w", dir, err)
 	}
 
-	err = os.WriteFile(file, content, 0644)
+	err = os.WriteFile(file, content, 0o644)
 	if err != nil {
 		return "", fmt.Errorf("error writing file %s: %w", file, err)
 	}
@@ -34,7 +34,7 @@ func WriteObject(content []byte) (string, error) {
 
 func ReadObject(hash string) ([]byte, error) {
 	if len(hash) < 40 {
-    return nil, errors.New("invalid hash")
+		return nil, errors.New("invalid hash")
 	}
 
 	file := filepath.Join(GitDir, "objects", hash[:2], hash[2:])
@@ -43,5 +43,5 @@ func ReadObject(hash string) ([]byte, error) {
 		return nil, fmt.Errorf("error reading object %s: %w", hash, err)
 	}
 
-	return bytes,nil
+	return bytes, nil
 }
