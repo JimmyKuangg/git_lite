@@ -33,7 +33,7 @@ func Checkout(commitHash string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	err = core.CleanupRemovedFiles(currentSnapshot, snapshot)
 	if err != nil {
 		return err

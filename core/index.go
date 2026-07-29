@@ -29,17 +29,17 @@ func (i *Index) Remove(path string) {
 
 func ReadIndex() (*Index, error) {
 	content, err := os.ReadFile(IndexPath)
-	
-  if os.IsNotExist(err) {
-    return &Index{
-      Entries: make(map[string]string),
-    }, nil
+
+	if os.IsNotExist(err) {
+		return &Index{
+			Entries: make(map[string]string),
+		}, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("unable to read index: %w", err)
 	}
 
 	index := &Index{
-    Entries: make(map[string]string),
+		Entries: make(map[string]string),
 	}
 	lines := strings.Split(string(content), "\n")
 
@@ -52,7 +52,7 @@ func ReadIndex() (*Index, error) {
 		if len(split) != 2 {
 			return nil, fmt.Errorf("invalid index entry: %s", line)
 		}
-		
+
 		index.Entries[split[0]] = split[1]
 	}
 
@@ -64,7 +64,7 @@ func (i *Index) Save() error {
 
 	for path, hash := range i.Entries {
 		entriesSlice = append(entriesSlice, IndexEntry{
-			Path: path, 
+			Path: path,
 			Hash: hash,
 		})
 	}
@@ -82,7 +82,7 @@ func (i *Index) Save() error {
 		buf.WriteByte('\n')
 	}
 
-	err := os.WriteFile(IndexPath, buf.Bytes(), 0644)
+	err := os.WriteFile(IndexPath, buf.Bytes(), 0o644)
 	if err != nil {
 		return fmt.Errorf("error writing index file: %w", err)
 	}

@@ -2,8 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"git_lite/core"
 	"time"
+
+	"git_lite/core"
 )
 
 func Log() error {
@@ -26,13 +27,13 @@ func Log() error {
 		fmt.Printf("commit %s\n", currentHash)
 		fmt.Printf("Author: %s\n", commit.Author)
 		fmt.Printf(
-    "Date: %s\n",
-    commit.Timestamp.Format(time.RFC1123),
+			"Date: %s\n",
+			commit.Timestamp.Format(time.RFC1123),
 		)
 		fmt.Printf("\n    %s\n\n", commit.Message)
 
 		currentHash = commit.Parent
 	}
-	
+
 	return nil
 }

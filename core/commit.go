@@ -12,10 +12,10 @@ import (
 
 type Commit struct {
 	Timestamp time.Time
-	Author 		string
-	Message 	string
-	Root 			string
-	Parent 		string
+	Author    string
+	Message   string
+	Root      string
+	Parent    string
 }
 
 func BuildCommit(message string, root string) (Commit, error) {
@@ -24,20 +24,20 @@ func BuildCommit(message string, root string) (Commit, error) {
 		author = "unknown"
 	}
 
-	head, err := ReadHEAD() 
+	head, err := ReadHEAD()
 	if err != nil {
 		return Commit{}, err
 	}
 
 	if strings.HasPrefix(head, "ref: ") {
-    head = ""
+		head = ""
 	}
 
 	commit := Commit{
-		Author: author,
-		Message: message,
-		Root: root,
-		Parent: head,
+		Author:    author,
+		Message:   message,
+		Root:      root,
+		Parent:    head,
 		Timestamp: time.Now(),
 	}
 
@@ -89,7 +89,7 @@ func ParseCommit(data []byte) (Commit, error) {
 
 		split := strings.SplitN(line, " ", 2)
 		if len(split) < 2 {
-			continue 
+			continue
 		}
 
 		key := split[0]
@@ -118,19 +118,19 @@ func ParseCommit(data []byte) (Commit, error) {
 	}
 
 	if !foundRoot || !foundAuthor || !foundTimestamp || !foundMessage {
-    return Commit{}, errors.New("invalid commit object")
+		return Commit{}, errors.New("invalid commit object")
 	}
 
 	return c, nil
 }
 
 func ReadCommit(hash string) (Commit, error) {
-  data, err := ReadObject(hash)
-  if err != nil {
-    return Commit{}, err
-  }
+	data, err := ReadObject(hash)
+	if err != nil {
+		return Commit{}, err
+	}
 
-  return ParseCommit(data)
+	return ParseCommit(data)
 }
 
 func ApplySnapshot(snapshot map[string]string) error {
@@ -140,12 +140,12 @@ func ApplySnapshot(snapshot map[string]string) error {
 			return err
 		}
 
-		err = os.MkdirAll(filepath.Dir(path), 0755)
+		err = os.MkdirAll(filepath.Dir(path), 0o755)
 		if err != nil {
 			return fmt.Errorf("error creating directory in ApplySnapshot: %w", err)
 		}
 
-		err = os.WriteFile(path, data, 0644) 
+		err = os.WriteFile(path, data, 0o644)
 		if err != nil {
 			return fmt.Errorf("error writing to file in ApplySnapshot: %w", err)
 		}
@@ -156,13 +156,13 @@ func ApplySnapshot(snapshot map[string]string) error {
 
 func CleanupRemovedFiles(working, snapshot map[string]string) error {
 	for path := range working {
-    if _, exists := snapshot[path]; !exists {
-      err := os.Remove(path)
+		if _, exists := snapshot[path]; !exists {
+			err := os.Remove(path)
 			if err != nil {
 				return fmt.Errorf("error removing file at %s: %w", path, err)
 			}
-    }
+		}
 	}
-	
+
 	return nil
 }

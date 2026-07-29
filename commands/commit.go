@@ -2,8 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"git_lite/core"
 	"strings"
+
+	"git_lite/core"
 )
 
 func Commit(message string) error {
@@ -21,7 +22,7 @@ func Commit(message string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Check HEAD to see if we have a new tree or not before commiting
 	headHash, err := core.ReadHEAD()
 	if err != nil {
@@ -29,7 +30,7 @@ func Commit(message string) error {
 	}
 
 	// If HEAD is empty, then we have no previous commits
-  // No need to compare
+	// No need to compare
 	if headHash != "" && !strings.HasPrefix(headHash, "ref: ") {
 		prevCommitBytes, err := core.ReadObject(headHash)
 		if err != nil {
